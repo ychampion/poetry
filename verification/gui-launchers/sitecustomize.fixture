@@ -1,0 +1,22 @@
+import json
+import os
+from pathlib import Path
+import sys
+import tkinter
+
+original = tkinter.Misc.mainloop
+
+
+def observed_mainloop(self, *args, **kwargs):
+    def observe():
+        window = self.winfo_toplevel()
+        receipt = dict(title=window.title(), visible=bool(window.winfo_viewable()),
+                       children=len(window.winfo_children()), executable=sys.executable)
+        Path(os.environ["LAUNCH_RECEIPT"]).write_text(json.dumps(receipt), encoding="utf-8")
+        window.destroy()
+
+    self.after(500, observe)
+    return original(self, *args, **kwargs)
+
+
+tkinter.Misc.mainloop = observed_mainloop

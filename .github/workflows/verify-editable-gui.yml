@@ -1,0 +1,37 @@
+name: Verify released editable GUI launchers
+on:
+  push:
+    branches: [verify/editable-gui-launchers]
+
+permissions:
+  contents: read
+
+jobs:
+  install:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        poetry: ["2.4.3", "2.5.0", "2.5.2"]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install Poetry from PyPI
+        run: |
+          python -m venv tool
+          python -m pip --python tool install "poetry==${{ matrix.poetry }}"
+      - name: Run Linux applications
+        if: runner.os == 'Linux'
+        run: xvfb-run -a python verification/gui-launchers/verify.py "${{ matrix.poetry }}" tool/bin/poetry receipt.json
+      - name: Run Windows applications
+        if: runner.os == 'Windows'
+        run: python verification/gui-launchers/verify.py "${{ matrix.poetry }}" tool/Scripts/poetry.exe receipt.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: receipt-${{ matrix.os }}-${{ matrix.poetry }}
+          path: receipt.json
+          if-no-files-found: error

@@ -1,0 +1,16 @@
+[project]
+name = "poetry-gui-scripts"
+version = "0.1.0"
+description = ""
+requires-python = ">=3.10,<3.14"
+dependencies = ["PySide6~=6.9.0"]
+
+[project.gui-scripts]
+mygui = "poetry_gui_scripts.__main__:main"
+
+[project.scripts]
+console-check = "poetry_gui_scripts.__main__:console"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
